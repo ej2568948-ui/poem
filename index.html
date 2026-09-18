@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#16233a" />
+  <meta name="description" content="오늘의 마음과 관심 주제에 어울리는 한국 시 전문과 감상 질문을 만나보세요." />
+  <title>흔들리며 피는 꽃, 시를 읽는 너에게</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2316233a'/%3E%3Cpath d='M17 17h22c5 0 8 3 8 8v24H25c-5 0-8-3-8-8V17z' fill='%23fff8ea'/%3E%3Cpath d='M25 17v32M31 27h10M31 34h8' stroke='%23d86b55' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --ink: #16233a;
+      --ink-soft: #3d485c;
+      --paper: #fffaf0;
+      --white: #ffffff;
+      --line: #ded7c9;
+      --accent: #c9503d;
+      --accent-dark: #9f3829;
+      --sky: #d9e6ea;
+      --gold: #d5ab55;
+      --shadow: 0 24px 70px rgba(22, 35, 58, .13);
+      font-family: "Noto Serif KR", "Nanum Myeongjo", "Malgun Gothic", Georgia, serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 11% 7%, rgba(213, 171, 85, .18), transparent 24rem),
+        radial-gradient(circle at 91% 92%, rgba(112, 160, 175, .18), transparent 26rem),
+        #eef1ed;
+    }
+
+    button, input { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+
+    .shell {
+      width: min(1160px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: -.03em;
+    }
+
+    .mark {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      color: var(--paper);
+      border-radius: 13px;
+      background: var(--ink);
+      box-shadow: 0 9px 20px rgba(22, 35, 58, .18);
+      font-size: 20px;
+    }
+
+    .saved-jump {
+      border: 1px solid rgba(22, 35, 58, .18);
+      background: rgba(255,255,255,.6);
+      color: var(--ink);
+      padding: 10px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .saved-jump:hover { background: var(--white); }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(300px, .84fr) minmax(420px, 1.16fr);
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .panel {
+      border: 1px solid rgba(22, 35, 58, .1);
+      border-radius: 26px;
+      background: rgba(255, 255, 255, .8);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .chooser { padding: clamp(24px, 4vw, 42px); }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 12px;
+      color: var(--accent-dark);
+      font-family: "Malgun Gothic", sans-serif;
+      font-size: .88rem;
+      font-weight: 800;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 26px;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 5vw, 4.25rem);
+      line-height: 1.08;
+      letter-spacing: -.06em;
+    }
+
+    .intro {
+      margin: 18px 0 30px;
+      color: var(--ink-soft);
+      font-family: "Malgun Gothic", sans-serif;
+      font-size: 1rem;
+      line-height: 1.75;
+    }
+
+    fieldset {
+      margin: 0 0 22px;
+      padding: 0;
+      border: 0;
+    }
+
+    legend {
+      margin-bottom: 11px;
+      font-family: "Malgun Gothic", sans-serif;
+      font-weight: 800;
+      font-size: .94rem;
+    }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chips input { position: absolute; opacity: 0; pointer-events: none; }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 8px 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--white);
+      color: var(--ink-soft);
+      cursor: pointer;
+      font-family: "Malgun Gothic", sans-serif;
+      font-size: .9rem;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .chip:hover { transform: translateY(-1px); border-color: var(--accent); }
+    .chips input:focus-visible + .chip { outline: 3px solid rgba(201, 80, 61, .25); outline-offset: 2px; }
+    .chips input:checked + .chip { color: var(--paper); background: var(--ink); border-color: var(--ink); }
+
+    .recommend-btn {
+      width: 100%;
+      min-height: 54px;
+      border: 0;
+      border-radius: 15px;
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+      font-family: "Malgun Gothic", sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      box-shadow: 0 12px 22px rgba(201, 80, 61, .23);
+      transition: background .18s ease, transform .18s ease;
+    }
+
+    .recommend-btn:hover { background: var(--accent-dark); transform: translateY(-1px); }
+    .recommend-btn:focus-visible, .action:focus-visible, .saved-jump:focus-visible { outline: 3px solid rgba(201, 80, 61, .3); outline-offset: 3px; }
+
+    .result {
+      position: relative;
+      overflow: hidden;
+      min-height: 660px;
+      padding: clamp(28px, 5vw, 58px);
+      color: var(--paper);
+      background: var(--ink);
+    }
+
+    .result::after {
+      content: "";
+      position: absolute;
+      right: -120px;
+      bottom: -130px;
+      width: 330px;
+      height: 330px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 250, 240, .13);
+      box-shadow: 0 0 0 44px rgba(255, 250, 240, .035), 0 0 0 88px rgba(255, 250, 240, .025);
+      pointer-events: none;
+    }
+
+    .result-inner { position: relative; z-index: 1; }
+
+    .result-kicker {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 58px;
+      color: #f0c77b;
+      font-family: "Malgun Gothic", sans-serif;
+      font-size: .88rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }
+
+    .match { color: rgba(255, 250, 240, .65); letter-spacing: 0; font-weight: 600; }
+
+    .poem-title {
+      margin: 0 0 9px;
+      max-width: 650px;
+      font-size: clamp(2.4rem, 6vw, 5.5rem);
+      line-height: 1.08;
+      letter-spacing: -.055em;
+      text-wrap: balance;
+    }
+
+    .poet {
+      margin: 0;
+      color: #f0c77b;
+      font-size: 1.12rem;
+      font-weight: 700;
+    }
+
+    .divider {
+      width: 52px;
+      height: 2px;
+      margin: 34px 0;
+      background: var(--accent);
+    }
+
+    .why {
+      max-width: 650px;
+      margin: 0;
+      color: rgba(255, 250, 240, .84);
+      font-family: "Malgun Gothic", sans-serif;
+      font-size: 1.03rem;
+      line-height: 1.8;
+    }
+
+    .poem-text-card {
+      max-width: 650px;
+      margin: 32px 0 0;
+      padding: clamp(22px, 4vw, 34px);
+      border: 1px solid rgba(255, 250, 240, .15);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .065);
+    }
+
+    .poem-text-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 22px;
+      color: #f0c77b;
+      font-family: "Malgun Gothic", sans-serif;
+      font-size: .88rem;
+      font-weight: 800;
+    }
+
+    .poem-text {
+      margin: 0;
+      color: var(--paper);
+      white-space: pre-wrap;
+      font: inherit;
+      font-size: clamp(1rem, 2vw, 1.12rem);
+      line-height: 2;
+      word-break: keep-all;
+    }
+
+    .source-link {
+      display: inline-block;
+      margin-top: 22px;
+      color: rgba(255, 250, 240, .66);
+      font-family: "Malgun Gothic", sans-serif;
+      font-size: .8rem;
+      text-underline-offset: 3px;
+    }
+
+    .question {
+      margin: 32px 0 0;
+      padding: 20px 22px;
+      border-left: 3px solid var(--gold);
+      background: rgba(255, 255, 255, .07);
+      border-radius: 0 14px 14px 0;
+    }
+
+    .question small {
+      display: block;
+      margin-bottom: 8px;
+      color: #f0c77b;
+      font-family: "Malgun Gothic", sans-serif;
+      font-weight: 800;
+    }
+
+    .question p { margin: 0; font-size: 1.06rem; line-height: 1.65; }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+
+    .action {
+      min-height: 43px;
+      padding: 9px 15px;
+      border: 1px solid rgba(255,255,255,.24);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--paper);
+      cursor: pointer;
+      font-family: "Malgun Gothic", sans-serif;
+      font-weight: 700;
+    }
+
+    .action:hover { background: rgba(255,255,255,.09); }
+    .action.saved { color: var(--ink); background: #f0c77b; border-color: #f0c77b; }
+
+    .notice {
+      margin: 18px 0 0;
+      color: rgba(255, 250, 240, .5);
+      font-family: "Malgun Gothic", sans-serif;
+      font-size: .78rem;
+      line-height: 1.55;
+    }
+
+    .favorites {
+      grid-column: 1 / -1;
+      padding: 24px;
+      scroll-margin-top: 18px;
+    }
+
+    .favorites-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+    .favorites h2 { margin: 0; font-size: 1.45rem; letter-spacing: -.035em; }
+    .favorites-head p { margin: 5px 0 0; color: var(--ink-soft); font-family: "Malgun Gothic", sans-serif; font-size: .9rem; }
+    .clear-btn { border: 0; background: transparent; color: var(--accent-dark); cursor: pointer; font-family: "Malgun Gothic", sans-serif; font-weight: 700; }
+
+    .saved-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
+    .saved-card { padding: 16px; border: 1px solid var(--line); border-radius: 15px; background: var(--paper); }
+    .saved-card strong { display: block; margin-bottom: 5px; font-size: 1.05rem; }
+    .saved-card span { color: var(--ink-soft); font-family: "Malgun Gothic", sans-serif; font-size: .86rem; }
+    .empty { grid-column: 1 / -1; padding: 20px 0 4px; color: #6b7280; font-family: "Malgun Gothic", sans-serif; text-align: center; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 20;
+      transform: translate(-50%, 24px);
+      padding: 11px 17px;
+      border-radius: 999px;
+      background: #0d1729;
+      color: white;
+      font-family: "Malgun Gothic", sans-serif;
+      font-size: .9rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (max-width: 860px) {
+      main { grid-template-columns: 1fr; }
+      .result { min-height: 590px; }
+      .saved-list { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 540px) {
+      .shell { width: min(100% - 20px, 1160px); padding-top: 16px; }
+      .topbar { margin-bottom: 12px; }
+      .panel { border-radius: 20px; }
+      .chooser, .result { padding: 25px 21px; }
+      .intro { margin-bottom: 24px; }
+      .result { min-height: 560px; }
+      .result-kicker { margin-bottom: 44px; }
+      .saved-list { grid-template-columns: 1fr; }
+      .brand-text { font-size: .93rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="mark" aria-hidden="true">詩</span><span class="brand-text">흔들리며 피는 꽃, 시를 읽는 너에게</span></div>
+      <button class="saved-jump" id="savedJump" type="button">담은 시 <span id="savedCount">0</span></button>
+    </header>
+
+    <main>
+      <section class="panel chooser" aria-labelledby="mainTitle">
+        <p class="eyebrow">오늘의 시 한 편</p>
+        <h1 id="mainTitle">지금의 마음을<br />들려주세요.</h1>
+        <p class="intro">세 가지를 고르면 오늘 곁에 둘 시와<br />천천히 생각해 볼 질문을 건넬게요.</p>
+
+        <form id="poemForm">
+          <fieldset>
+            <legend>1. 지금 어떤 마음인가요?</legend>
+            <div class="chips">
+              <input type="radio" name="mood" id="mood-comfort" value="위로" checked /><label class="chip" for="mood-comfort">위로가 필요해요</label>
+              <input type="radio" name="mood" id="mood-flutter" value="설렘" /><label class="chip" for="mood-flutter">설레요</label>
+              <input type="radio" name="mood" id="mood-longing" value="그리움" /><label class="chip" for="mood-longing">그리워요</label>
+              <input type="radio" name="mood" id="mood-courage" value="용기" /><label class="chip" for="mood-courage">용기가 필요해요</label>
+              <input type="radio" name="mood" id="mood-reflect" value="성찰" /><label class="chip" for="mood-reflect">생각이 많아요</label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>2. 어떤 이야기를 만나고 싶나요?</legend>
+            <div class="chips">
+              <input type="radio" name="theme" id="theme-growth" value="성장" checked /><label class="chip" for="theme-growth">성장</label>
+              <input type="radio" name="theme" id="theme-love" value="사랑" /><label class="chip" for="theme-love">사랑</label>
+              <input type="radio" name="theme" id="theme-nature" value="자연" /><label class="chip" for="theme-nature">자연</label>
+              <input type="radio" name="theme" id="theme-people" value="관계" /><label class="chip" for="theme-people">관계</label>
+              <input type="radio" name="theme" id="theme-life" value="삶" /><label class="chip" for="theme-life">삶</label>
+              <input type="radio" name="theme" id="theme-freedom" value="자유" /><label class="chip" for="theme-freedom">자유</label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>3. 얼마 동안 머물까요?</legend>
+            <div class="chips">
+              <input type="radio" name="pace" id="pace-short" value="짧게" checked /><label class="chip" for="pace-short">잠깐, 가볍게</label>
+              <input type="radio" name="pace" id="pace-slow" value="천천히" /><label class="chip" for="pace-slow">천천히</label>
+              <input type="radio" name="pace" id="pace-deep" value="깊게" /><label class="chip" for="pace-deep">오래, 깊게</label>
+            </div>
+          </fieldset>
+
+          <button class="recommend-btn" type="submit">나에게 맞는 시 추천받기</button>
+        </form>
+      </section>
+
+      <section class="panel result" aria-live="polite" aria-labelledby="poemTitle">
+        <div class="result-inner">
+          <div class="result-kicker"><span>당신에게 도착한 시</span><span class="match" id="matchText">위로 · 성장 · 짧게</span></div>
+          <h2 class="poem-title" id="poemTitle">풀꽃</h2>
+          <p class="poet" id="poet">나태주</p>
+          <div class="divider"></div>
+          <p class="why" id="why">작고 평범해 보이는 존재를 천천히 바라볼 때 발견되는 아름다움을 이야기합니다. 지친 날, 스스로의 가치를 다시 알아보고 싶은 마음에 잘 어울리는 시예요.</p>
+          <div class="poem-text-card">
+            <div class="poem-text-label"><span>시 전문</span><span>천천히 읽어 보세요</span></div>
+            <pre class="poem-text" id="poemText"></pre>
+            <a class="source-link" id="sourceLink" href="#" target="_blank" rel="noreferrer">원문·작품 정보 확인</a>
+          </div>
+          <div class="question">
+            <small>시를 읽고 생각해 볼 질문</small>
+            <p id="question">오늘 내가 오래 바라봐 주고 싶은 사람이나 마음은 무엇인가요?</p>
+          </div>
+          <div class="actions">
+            <button class="action" id="saveBtn" type="button">♡ 이 시 담기</button>
+            <button class="action" id="againBtn" type="button">다른 시 만나기</button>
+            <button class="action" id="copyBtn" type="button">추천 카드 복사</button>
+          </div>
+          <p class="notice">전문은 저작권 보호기간이 만료된 작품만 제공합니다. 표기는 현대 독자가 읽기 쉽도록 일부 띄어쓰기와 문장부호를 정리했습니다.</p>
+        </div>
+      </section>
+
+      <section class="panel favorites" id="favorites" aria-labelledby="favoritesTitle">
+        <div class="favorites-head">
+          <div><h2 id="favoritesTitle">내가 담은 시</h2><p>마음에 남은 작품을 이 기기에 보관합니다.</p></div>
+          <button class="clear-btn" id="clearBtn" type="button">모두 비우기</button>
+        </div>
+        <div class="saved-list" id="savedList"></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    const poems = [
+      { title:'서시', poet:'윤동주', moods:['성찰','용기','위로'], themes:['삶','성장'], pace:'천천히', why:'부끄럽지 않은 삶을 향한 다짐이 맑고 단단하게 담겨 있습니다. 나의 선택과 방향을 가만히 돌아보고 싶은 날에 어울려요.', question:'지금 내가 지키고 싶은 한 가지 원칙은 무엇인가요?', source:'https://yoondongju.yonsei.ac.kr/yoondongju_m/ydj/ydj_2_1_1.do', text:`죽는 날까지 하늘을 우러러
+한 점 부끄럼이 없기를,
+잎새에 이는 바람에도
+나는 괴로워했다.
+
+별을 노래하는 마음으로
+모든 죽어 가는 것을 사랑해야지
+그리고 나한테 주어진 길을
+걸어가야겠다.
+
+오늘 밤에도 별이 바람에 스치운다.` },
+      { title:'새로운 길', poet:'윤동주', moods:['용기','설렘','위로'], themes:['성장','삶','자유'], pace:'짧게', why:'어제도 오늘도 이어지는 길 위에서 새롭게 나아갈 마음을 발견하게 합니다. 작은 시작을 앞두고 용기가 필요한 순간에 잘 맞아요.', question:'내일의 내가 내딛고 싶은 가장 작은 첫걸음은 무엇인가요?', source:'https://encykorea.aks.ac.kr/Article/E0042294', text:`내를 건너서 숲으로
+고개를 넘어서 마을로
+
+어제도 가고 오늘도 갈
+나의 길 새로운 길
+
+민들레가 피고 까치가 날고
+아가씨가 지나고 바람이 일고
+
+나의 길은 언제나 새로운 길
+오늘도…… 내일도……
+
+내를 건너서 숲으로
+고개를 넘어서 마을로` },
+      { title:'진달래꽃', poet:'김소월', moods:['그리움','위로'], themes:['사랑','관계'], pace:'천천히', why:'떠나는 이를 붙잡지 못하는 마음을 절제된 언어로 보여 줍니다. 이별과 그리움이 한꺼번에 밀려오는 날에 마음을 비춰 볼 수 있어요.', question:'보내 주어야 했지만 마음에는 남아 있는 것은 무엇인가요?', source:'https://www.culture.go.kr/portal/cltKnw/artCont/view.do?cdVal=H&knwldgClsfCd=H231&knwldgSn=7515&menuNo=200022', text:`나 보기가 역겨워
+가실 때에는
+말없이 고이 보내 드리오리다
+
+영변에 약산
+진달래꽃
+아름 따다 가실 길에 뿌리오리다
+
+가시는 걸음 걸음
+놓인 그 꽃을
+사뿐히 즈려밟고 가시옵소서
+
+나 보기가 역겨워
+가실 때에는
+죽어도 아니 눈물 흘리오리다` },
+      { title:'산유화', poet:'김소월', moods:['성찰','그리움','위로'], themes:['자연','삶'], pace:'짧게', why:'피고 지는 꽃과 홀로 살아가는 존재를 바라보며 삶의 고독을 생각하게 합니다. 말없이 자연 곁에 머물고 싶은 날에 어울려요.', question:'혼자 있는 시간이 내게 가르쳐 준 것은 무엇인가요?', source:'https://gongu.copyright.or.kr/gongu/planng/recomendThema/themaClList.do?curationSeDp1=32&curationSeDp2=47&curationSn=8&menuNo=200196', text:`산에는 꽃 피네
+꽃이 피네
+갈 봄 여름 없이
+꽃이 피네
+
+산에
+산에
+피는 꽃은
+저만치 혼자서 피어 있네
+
+산에서 우는 작은 새여
+꽃이 좋아
+산에서
+사노라네
+
+산에는 꽃 지네
+꽃이 지네
+갈 봄 여름 없이
+꽃이 지네` },
+      { title:'호수', poet:'정지용', moods:['설렘','그리움','위로'], themes:['사랑','자연','관계'], pace:'짧게', why:'짧은 언어 안에 커다란 그리움과 마음의 깊이를 담고 있습니다. 복잡한 말보다 한 장면으로 감정을 느끼고 싶은 날에 좋아요.', question:'내 마음속에 넓게 자리한 사람이나 풍경은 무엇인가요?', source:'https://gongu.copyright.or.kr/', text:`얼굴 하나야
+손바닥 둘로
+폭 가리지만,
+
+보고 싶은 마음
+호수만 하니
+눈 감을밖에.` },
+      { title:'광야', poet:'이육사', moods:['용기','성찰'], themes:['자유','삶','성장'], pace:'깊게', why:'먼 시간과 넓은 공간을 가로지르는 강한 의지와 미래에 대한 믿음이 담겨 있습니다. 흔들리지 않는 마음이 필요한 날에 힘을 줍니다.', question:'아직 보이지 않아도 내가 믿고 기다리는 미래는 무엇인가요?', source:'https://ko.wikisource.org/wiki/%EA%B4%91%EC%95%BC_(%EC%9D%B4%EC%9C%A1%EC%82%AC)', text:`까마득한 날에
+하늘이 처음 열리고
+어데 닭 우는 소리 들렸으랴
+
+모든 산맥들이
+바다를 연모해 휘달릴 때도
+차마 이곳을 범(犯)하던 못하였으리라
+
+끊임없는 광음(光陰)을
+부지런한 계절이 피어선 지고
+큰 강물이 비로소 길을 열었다
+
+지금 눈 내리고
+매화 향기 홀로 아득하니
+내 여기 가난한 노래의 씨를 뿌려라.
+
+다시 천고(千古)의 뒤에
+백마 타고 오는 초인(超人)이 있어
+이 광야에서 목놓아 부르게 하리라` },
+      { title:'청포도', poet:'이육사', moods:['설렘','용기','그리움'], themes:['자유','자연','관계'], pace:'천천히', why:'기다림과 희망을 맑은 색채와 풍경으로 펼쳐 보입니다. 반가운 만남이나 더 나은 내일을 기다리는 마음에 잘 어울려요.', question:'내가 정성껏 맞이하고 싶은 미래의 손님은 누구인가요?', source:'https://ko.wikisource.org/wiki/%EC%B2%AD%ED%8F%AC%EB%8F%84', text:`내 고장 칠월은
+청포도가 익어가는 시절
+
+이 마을 전설이 주절이주절이 열리고
+먼 데 하늘이 꿈꾸며 알알이 들어와 박혀
+
+하늘 밑 푸른 바다가 가슴을 열고
+흰 돛 단 배가 곱게 밀려서 오면
+
+내가 바라는 손님은 고달픈 몸으로
+청포를 입고 찾아온다고 했으니
+
+내 그를 맞아 이 포도를 따 먹으면
+두 손은 함뿍 적셔도 좋으련
+
+아이야 우리 식탁엔 은쟁반에
+하이얀 모시 수건을 마련해 두렴` }
+    ];
+
+    const form = document.querySelector('#poemForm');
+    const poemTitle = document.querySelector('#poemTitle');
+    const poet = document.querySelector('#poet');
+    const why = document.querySelector('#why');
+    const poemText = document.querySelector('#poemText');
+    const sourceLink = document.querySelector('#sourceLink');
+    const question = document.querySelector('#question');
+    const matchText = document.querySelector('#matchText');
+    const saveBtn = document.querySelector('#saveBtn');
+    const savedList = document.querySelector('#savedList');
+    const savedCount = document.querySelector('#savedCount');
+    const toast = document.querySelector('#toast');
+    let current = poems[0];
+    let lastIndex = -1;
+    let saved = JSON.parse(localStorage.getItem('poem-compass-saved') || '[]');
+
+    function selections() {
+      const data = new FormData(form);
+      return { mood: data.get('mood'), theme: data.get('theme'), pace: data.get('pace') };
+    }
+
+    function choosePoem(preferences = selections()) {
+      const ranked = poems.map((poem, index) => ({
+        poem, index,
+        score: (poem.moods.includes(preferences.mood) ? 4 : 0) +
+               (poem.themes.includes(preferences.theme) ? 3 : 0) +
+               (poem.pace === preferences.pace ? 2 : 0) + Math.random()
+      })).sort((a, b) => b.score - a.score);
+      const best = ranked.filter(item => item.score >= ranked[0].score - 1.25 && item.index !== lastIndex);
+      const picked = best[Math.floor(Math.random() * best.length)] || ranked[0];
+      lastIndex = picked.index;
+      current = picked.poem;
+      renderResult(preferences);
+      return current;
+    }
+
+    function renderResult(preferences) {
+      poemTitle.textContent = current.title;
+      poet.textContent = current.poet;
+      why.textContent = current.why;
+      poemText.textContent = current.text;
+      sourceLink.href = current.source;
+      question.textContent = current.question;
+      matchText.textContent = `${preferences.mood} · ${preferences.theme} · ${preferences.pace}`;
+      const isSaved = saved.some(item => item.title === current.title && item.poet === current.poet);
+      saveBtn.classList.toggle('saved', isSaved);
+      saveBtn.textContent = isSaved ? '♥ 담은 시' : '♡ 이 시 담기';
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove('show'), 1800);
+    }
+
+    function persist() {
+      localStorage.setItem('poem-compass-saved', JSON.stringify(saved));
+      renderSaved();
+    }
+
+    function toggleSave() {
+      const index = saved.findIndex(item => item.title === current.title && item.poet === current.poet);
+      if (index >= 0) {
+        saved.splice(index, 1);
+        showToast('담은 시에서 꺼냈어요.');
+      } else {
+        saved.unshift({ title: current.title, poet: current.poet, question: current.question });
+        showToast('마음에 남은 시로 담았어요.');
+      }
+      persist();
+      renderResult(selections());
+    }
+
+    function renderSaved() {
+      savedCount.textContent = saved.length;
+      if (!saved.length) {
+        savedList.innerHTML = '<p class="empty">아직 담은 시가 없어요. 마음에 머문 시를 담아 보세요.</p>';
+        return;
+      }
+      savedList.innerHTML = saved.map(item => `<article class="saved-card"><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(item.poet)} · ${escapeHtml(item.question)}</span></article>`).join('');
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+    }
+
+    form.addEventListener('submit', event => { event.preventDefault(); choosePoem(); });
+    document.querySelector('#againBtn').addEventListener('click', () => choosePoem());
+    saveBtn.addEventListener('click', toggleSave);
+    document.querySelector('#savedJump').addEventListener('click', () => document.querySelector('#favorites').scrollIntoView({ behavior:'smooth' }));
+    document.querySelector('#clearBtn').addEventListener('click', () => { if (saved.length) { saved = []; persist(); renderResult(selections()); showToast('담은 시를 모두 비웠어요.'); } });
+    document.querySelector('#copyBtn').addEventListener('click', async () => {
+      const text = `[시를 읽는 너에게]\n${current.title} — ${current.poet}\n\n${current.text}\n\n추천 이유: ${current.why}\n\n감상 질문: ${current.question}\n\n작품 정보: ${current.source}`;
+      try { await navigator.clipboard.writeText(text); showToast('추천 카드를 복사했어요.'); }
+      catch { showToast('복사 기능을 사용할 수 없어요.'); }
+    });
+
+    function registerWebMCP() {
+      const context = document.modelContext;
+      if (!context?.registerTool) return;
+      const moods = ['위로','설렘','그리움','용기','성찰'];
+      const themes = ['사랑','성장','자연','관계','삶','자유'];
+      const paces = ['짧게','천천히','깊게'];
+      try {
+        void Promise.resolve(context.registerTool({
+          name: 'recommend_poem',
+          title: '시 추천받기',
+          description: '기분, 주제, 읽을 시간에 맞는 시를 추천하고 화면에 표시합니다.',
+          inputSchema: { type:'object', properties:{ mood:{type:'string', enum:moods}, theme:{type:'string', enum:themes}, pace:{type:'string', enum:paces} }, required:['mood','theme','pace'], additionalProperties:false },
+          annotations: { readOnlyHint:false, untrustedContentHint:false },
+          execute(input) {
+            if (!moods.includes(input?.mood) || !themes.includes(input?.theme) || !paces.includes(input?.pace)) throw new Error('지원하지 않는 선택값입니다.');
+            const recommended = choosePoem(input);
+            return { title:recommended.title, poet:recommended.poet, poemText:recommended.text, reason:recommended.why, reflectionQuestion:recommended.question, source:recommended.source };
+          }
+        }));
+        void Promise.resolve(context.registerTool({
+          name: 'save_current_poem',
+          title: '현재 시 담기',
+          description: '현재 화면에 추천된 시를 이 기기의 담은 시 목록에 저장합니다.',
+          inputSchema: { type:'object', properties:{}, additionalProperties:false },
+          annotations: { readOnlyHint:false, untrustedContentHint:false },
+          execute() {
+            if (!saved.some(item => item.title === current.title && item.poet === current.poet)) { saved.unshift({ title:current.title, poet:current.poet, question:current.question }); persist(); renderResult(selections()); }
+            return { saved:true, title:current.title, poet:current.poet };
+          }
+        }));
+      } catch (error) { console.debug('WebMCP unavailable', error); }
+    }
+
+    renderSaved();
+    renderResult(selections());
+    registerWebMCP();
+  </script>
+</body>
+</html>
