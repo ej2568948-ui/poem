@@ -466,7 +466,7 @@
           <div class="poem-text-card">
             <div class="poem-text-label"><span>시 전문</span><span>천천히 읽어 보세요</span></div>
             <pre class="poem-text" id="poemText"></pre>
-            <a class="source-link" id="sourceLink" href="#" target="_blank" rel="noreferrer">원문·작품 정보 확인</a>
+            <span class="source-link" id="sourceLink">출처: 원문·작품 정보 확인</span>
           </div>
           <div class="question">
             <small>시를 읽고 생각해 볼 질문</small>
@@ -772,7 +772,10 @@
       poet.textContent = current.poet;
       why.textContent = current.why;
       poemText.textContent = current.text;
-      sourceLink.href = current.source;
+      sourceLink.textContent = current.poet === '시추천앱'
+        ? '창작시 · 시추천앱'
+        : '출처: 원문·작품 정보 확인';
+      sourceLink.removeAttribute('href');
       question.textContent = current.question;
       matchText.textContent = `${preferences.mood} · ${preferences.theme} · ${preferences.pace}`;
       const isSaved = saved.some(item => item.title === current.title && item.poet === current.poet);
