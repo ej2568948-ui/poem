@@ -14,11 +14,11 @@
 
 ## Gemini AI 검색 연결
 
-앱은 `/api/recommend` 서버 함수를 통해 Gemini File Search를 사용합니다. 환경변수가 없으면 기존 로컬 추천으로 자동 대체됩니다.
+앱은 `/api/recommend` 서버 함수를 통해 Gemini로 작품 목록을 분석합니다. `GEMINI_FILE_SEARCH_STORE`를 추가하면 대규모 작품 데이터에 대한 Gemini File Search로 확장되고, 환경변수가 없으면 기존 로컬 추천으로 자동 대체됩니다.
 
 1. Google AI Studio에서 새 Gemini API 키를 발급합니다.
-2. Gemini File Search Store를 만들고 `GEMINI_FILE_SEARCH_STORE`에 store 이름을 등록합니다.
-3. `.env.example`을 참고해 `GEMINI_API_KEY`와 `GEMINI_MODEL`을 서버 환경변수로 등록합니다.
+2. `.env.example`을 참고해 `GEMINI_API_KEY`와 `GEMINI_MODEL`을 서버 환경변수로 등록합니다.
+3. 작품 수가 많아지면 Gemini File Search Store를 만들고 `GEMINI_FILE_SEARCH_STORE`를 추가합니다.
 
 API 키는 브라우저 코드에 넣지 마세요. AI 검색 결과는 작품 ID와 추천 이유만 사용하고, 실제 시 전문은 앱의 원문 데이터에서 표시합니다.
 
