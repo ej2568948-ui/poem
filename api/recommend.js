@@ -1,9 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
-const catalog = JSON.parse(
+const baseCatalog = JSON.parse(
   fs.readFileSync(path.join(process.cwd(), 'data', 'poems-catalog.json'), 'utf8')
 );
+const publicDomainPoems = JSON.parse(
+  fs.readFileSync(path.join(process.cwd(), 'data', 'public-domain-poems.json'), 'utf8')
+).map(({ text, ...poem }) => poem);
+const catalog = baseCatalog.slice(0, 12).concat(publicDomainPoems);
 
 function localRecommend({ mood, theme, pace, recentPoemIds = [] }) {
   const ranked = catalog.map(poem => ({

@@ -477,7 +477,7 @@
             <button class="action" id="againBtn" type="button">다른 시 만나기</button>
             <button class="action" id="copyBtn" type="button">추천 카드 복사</button>
           </div>
-          <p class="notice">전문은 이용 가능 여부를 확인한 작품과 앱 창작시로 제공합니다. 표기는 현대 독자가 읽기 쉽도록 일부 띄어쓰기와 문장부호를 정리했습니다.</p>
+          <p class="notice">전문은 위키문헌에서 원문과 자유 이용 상태를 확인한 기존 작품으로 제공합니다.</p>
         </div>
       </section>
 
@@ -498,7 +498,7 @@
   <div class="toast" id="toast" role="status"></div>
 
   <script>
-    const poems = [
+    let poems = [
       { title:'서시', poet:'윤동주', moods:['성찰','용기','위로'], themes:['삶','성장'], pace:'천천히', why:'부끄럽지 않은 삶을 향한 다짐이 맑고 단단하게 담겨 있습니다. 나의 선택과 방향을 가만히 돌아보고 싶은 날에 어울려요.', question:'지금 내가 지키고 싶은 한 가지 원칙은 무엇인가요?', source:'https://yoondongju.yonsei.ac.kr/yoondongju_m/ydj/ydj_2_1_1.do', text:`죽는 날까지 하늘을 우러러
 한 점 부끄럼이 없기를,
 잎새에 이는 바람에도
@@ -713,6 +713,22 @@
     let lastIndex = -1;
     let saved = JSON.parse(localStorage.getItem('poem-compass-saved') || '[]');
 
+    async function loadPublicDomainPoems() {
+      try {
+        const response = await fetch('data/public-domain-poems.json');
+        if (!response.ok) throw new Error('public-domain poem data unavailable');
+        const curated = await response.json();
+        if (!Array.isArray(curated) || curated.length !== 88) throw new Error('invalid curated poem data');
+        poems = poems.slice(0, 12).concat(curated);
+        current = poems[0];
+        renderSaved();
+        renderResult(selections());
+      } catch (error) {
+        console.error(error);
+        showToast('공개 원문을 불러오지 못해 기본 작품을 보여드려요.');
+      }
+    }
+
     function selections() {
       const data = new FormData(form);
       return { mood: data.get('mood'), theme: data.get('theme'), pace: data.get('pace') };
@@ -893,6 +909,7 @@
     renderSaved();
     renderResult(selections());
     registerWebMCP();
+    void loadPublicDomainPoems();
   </script>
 </body>
 </html>
