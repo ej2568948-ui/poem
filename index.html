@@ -849,7 +849,10 @@
     });
     document.querySelector('#clearBtn').addEventListener('click', () => { if (saved.length) { saved = []; persist(); renderResult(selections()); showToast('담은 시를 모두 비웠어요.'); } });
     document.querySelector('#copyBtn').addEventListener('click', async () => {
-      const text = `[시를 읽는 너에게]\n${current.title} — ${current.poet}\n\n${current.text}\n\n추천 이유: ${current.why}\n\n감상 질문: ${current.question}\n\n작품 정보: ${current.source}`;
+      const sourceText = current.poet === '시추천앱'
+        ? '출처: 창작시 · 시추천앱'
+        : '출처: 원문·작품 정보 확인';
+      const text = `[시를 읽는 너에게]\n${current.title} — ${current.poet}\n\n${current.text}\n\n추천 이유: ${current.why}\n\n감상 질문: ${current.question}\n\n${sourceText}`;
       try { await navigator.clipboard.writeText(text); showToast('추천 카드를 복사했어요.'); }
       catch { showToast('복사 기능을 사용할 수 없어요.'); }
     });
