@@ -8,7 +8,10 @@ const hanja = /[\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]/;
 const publicDomainPoems = JSON.parse(
   fs.readFileSync(path.join(process.cwd(), 'data', 'public-domain-poems.json'), 'utf8')
 ).filter((poem) => !hanja.test(poem.text || '')).map(({ text, ...poem }) => poem);
-const catalog = baseCatalog.slice(0, 12).concat(publicDomainPoems);
+const creativePoems = JSON.parse(
+  fs.readFileSync(path.join(process.cwd(), 'data', 'creative-poems.json'), 'utf8')
+).map((poem, index) => ({ ...poem, id: `creative-${String(index + 1).padStart(3, '0')}` }));
+const catalog = baseCatalog.slice(0, 12).concat(publicDomainPoems, creativePoems).slice(0, 100);
 
 function localRecommend({ mood, theme, pace, recentPoemIds = [] }) {
   const ranked = catalog.map(poem => ({

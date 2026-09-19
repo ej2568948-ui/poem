@@ -466,7 +466,7 @@
           <div class="poem-text-card">
             <div class="poem-text-label"><span>시 전문</span><span>천천히 읽어 보세요</span></div>
             <pre class="poem-text" id="poemText"></pre>
-            <span class="source-link" id="sourceLink">출처: 원문·작품 정보 확인</span>
+            <a class="source-link" id="sourceLink" href="#" target="_blank" rel="noreferrer">출처</a>
           </div>
           <div class="question">
             <small>시를 읽고 생각해 볼 질문</small>
@@ -477,7 +477,7 @@
             <button class="action" id="againBtn" type="button">다른 시 만나기</button>
             <button class="action" id="copyBtn" type="button">추천 카드 복사</button>
           </div>
-          <p class="notice">전문은 위키문헌에서 원문과 자유 이용 상태를 확인한 기존 작품으로 제공합니다.</p>
+          <p class="notice">기존 작품은 원문·자유 이용 상태를 확인해 제공하고, 창작시는 카드에 창작시라고 명확히 표시합니다.</p>
         </div>
       </section>
 
@@ -721,7 +721,8 @@
         if (!Array.isArray(curated)) throw new Error('invalid curated poem data');
         const hanja = /[\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]/;
         const readableCurated = curated.filter((poem) => !hanja.test(poem.text || ''));
-        poems = poems.slice(0, 12).concat(readableCurated);
+        const creativePoems = poems.filter((poem) => poem.poet === '시추천앱');
+        poems = poems.slice(0, 12).concat(readableCurated, creativePoems).slice(0, 100);
         current = poems[0];
         renderSaved();
         renderResult(selections());
@@ -790,10 +791,12 @@
       poet.textContent = current.poet;
       why.textContent = current.why;
       poemText.textContent = current.text;
-      sourceLink.textContent = current.poet === '시추천앱'
-        ? '창작시 · 시추천앱'
-        : '출처: 원문·작품 정보 확인';
-      sourceLink.removeAttribute('href');
+        sourceLink.textContent = current.poet === '시추천앱'
+          ? '출처: 창작시 · 시추천앱'
+          : '출처: 위키문헌 원문';
+        sourceLink.href = current.source || '#';
+        sourceLink.target = '_blank';
+        sourceLink.rel = 'noreferrer';
       question.textContent = current.question;
       matchText.textContent = `${preferences.mood} · ${preferences.theme} · ${preferences.pace}`;
       const isSaved = saved.some(item => item.title === current.title && item.poet === current.poet);
@@ -869,7 +872,7 @@
     document.querySelector('#copyBtn').addEventListener('click', async () => {
       const sourceText = current.poet === '시추천앱'
         ? '출처: 창작시 · 시추천앱'
-        : '출처: 원문·작품 정보 확인';
+        : `출처: ${current.source}`;
       const text = `[시를 읽는 너에게]\n${current.title} — ${current.poet}\n\n${current.text}\n\n추천 이유: ${current.why}\n\n감상 질문: ${current.question}\n\n${sourceText}`;
       try { await navigator.clipboard.writeText(text); showToast('추천 카드를 복사했어요.'); }
       catch { showToast('복사 기능을 사용할 수 없어요.'); }
