@@ -24,6 +24,28 @@ function parseJson(text) {
   return JSON.parse(cleaned);
 }
 
+async function recommendWithCatalog({ mood, theme, pace, recentPoemIds }) {
+  const prompt = `너는 한국 시 큐레이터야. 아래 작품 목록에서 사용자의 조건에 가장 잘 맞는 작품 하나를 골라 JSON만 반환해.
+조건: 감정=${mood}, 주제=${theme}, 읽는 시간=${pace}, 최근 추천 ID=${recentPoemIds.join(',') || '없음'}
+반드시 목록에 있는 id만 선택하고, 최근 추천 작품은 가능하면 피해야 해.
+형식: {"id":"poem-001","reason":"한국어 추천 이유"}
+작품 목록:
+${JSON.stringify(catalog)}`;
+
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${process.env.GEMINI_MODEL || 'gemini-3.8-flash'}:generateContent?key=${encodeURIComponent(process.env.GEMINI_API_KEY)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: 'application/json' }
+    })
+  });
+  if (!response.ok) throw new Error(`Gemini catalog request failed: ${response.status}`);
+  const payload = await response.json();
+  const text = payload.candidates?.[0]?.content?.parts?.find(part => part.text)?.text;
+  return parseJson(text);
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
@@ -32,13 +54,19 @@ module.exports = async function handler(req, res) {
   if (!mood || !theme || !pace) return res.status(400).json({ error: 'mood, theme, pace are required' });
 
   const local = localRecommend({ mood, theme, pace, recentPoemIds });
-  const hasAiSearch = process.env.GEMINI_API_KEY && process.env.GEMINI_FILE_SEARCH_STORE;
+  const hasGemini = Boolean(process.env.GEMINI_API_KEY);
 
-  if (!hasAiSearch) {
+  if (!hasGemini) {
     return res.status(200).json({ ...local, mode: 'local-fallback' });
   }
 
   try {
+    if (!process.env.GEMINI_FILE_SEARCH_STORE) {
+      const result = await recommendWithCatalog({ mood, theme, pace, recentPoemIds });
+      const selected = catalog.find(poem => poem.id === result.id) || local;
+      return res.status(200).json({ ...selected, why: result.reason || selected.why, mode: 'ai-catalog' });
+    }
+
     const response = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
       method: 'POST',
       headers: {
