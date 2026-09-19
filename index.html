@@ -718,8 +718,10 @@
         const response = await fetch('data/public-domain-poems.json');
         if (!response.ok) throw new Error('public-domain poem data unavailable');
         const curated = await response.json();
-        if (!Array.isArray(curated) || curated.length !== 88) throw new Error('invalid curated poem data');
-        poems = poems.slice(0, 12).concat(curated);
+        if (!Array.isArray(curated)) throw new Error('invalid curated poem data');
+        const hanja = /[\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]/;
+        const readableCurated = curated.filter((poem) => !hanja.test(poem.text || ''));
+        poems = poems.slice(0, 12).concat(readableCurated);
         current = poems[0];
         renderSaved();
         renderResult(selections());

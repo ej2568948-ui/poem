@@ -4,9 +4,10 @@ const path = require('path');
 const baseCatalog = JSON.parse(
   fs.readFileSync(path.join(process.cwd(), 'data', 'poems-catalog.json'), 'utf8')
 );
+const hanja = /[\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]/;
 const publicDomainPoems = JSON.parse(
   fs.readFileSync(path.join(process.cwd(), 'data', 'public-domain-poems.json'), 'utf8')
-).map(({ text, ...poem }) => poem);
+).filter((poem) => !hanja.test(poem.text || '')).map(({ text, ...poem }) => poem);
 const catalog = baseCatalog.slice(0, 12).concat(publicDomainPoems);
 
 function localRecommend({ mood, theme, pace, recentPoemIds = [] }) {
