@@ -794,9 +794,15 @@
         sourceLink.textContent = current.poet === '시추천앱'
           ? '출처: 창작시 · 시추천앱'
           : '출처: 위키문헌 원문';
-        sourceLink.href = current.source || '#';
-        sourceLink.target = '_blank';
-        sourceLink.rel = 'noreferrer';
+        if (current.poet === '시추천앱') {
+          sourceLink.removeAttribute('href');
+          sourceLink.removeAttribute('target');
+          sourceLink.removeAttribute('rel');
+        } else {
+          sourceLink.href = current.source || '#';
+          sourceLink.target = '_blank';
+          sourceLink.rel = 'noreferrer';
+        }
       question.textContent = current.question;
       matchText.textContent = `${preferences.mood} · ${preferences.theme} · ${preferences.pace}`;
       const isSaved = saved.some(item => item.title === current.title && item.poet === current.poet);
