@@ -355,9 +355,13 @@
     .clear-btn { border: 0; background: transparent; color: var(--accent-dark); cursor: pointer; font-family: "Malgun Gothic", sans-serif; font-weight: 700; }
 
     .saved-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
-    .saved-card { padding: 16px; border: 1px solid var(--line); border-radius: 15px; background: var(--paper); }
+    .saved-card { width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: 15px; background: var(--paper); color: var(--ink); cursor: pointer; text-align: left; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+    .saved-card:hover, .saved-card:focus-visible { border-color: var(--accent); box-shadow: 0 10px 22px rgba(20, 39, 70, .08); outline: none; transform: translateY(-2px); }
     .saved-card strong { display: block; margin-bottom: 5px; font-size: 1.05rem; }
     .saved-card span { color: var(--ink-soft); font-family: "Malgun Gothic", sans-serif; font-size: .86rem; }
+    .saved-tools { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
+    .saved-search { width: min(100%, 280px); padding: 10px 13px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); font: inherit; }
+    .saved-search:focus { outline: 2px solid rgba(39, 92, 133, .3); outline-offset: 2px; }
     .empty { grid-column: 1 / -1; padding: 20px 0 4px; color: #6b7280; font-family: "Malgun Gothic", sans-serif; text-align: center; }
 
     .toast {
@@ -479,8 +483,12 @@
 
       <section class="panel favorites" id="favorites" aria-labelledby="favoritesTitle">
         <div class="favorites-head">
-          <div><h2 id="favoritesTitle">내가 담은 시</h2><p>마음에 남은 작품을 이 기기에 보관합니다.</p></div>
+          <div><h2 id="favoritesTitle">내가 담은 시</h2><p>카드를 누르면 그 작품을 다시 읽을 수 있어요.</p></div>
           <button class="clear-btn" id="clearBtn" type="button">모두 비우기</button>
+        </div>
+        <div class="saved-tools">
+          <label class="sr-only" for="savedSearch">담은 시 검색</label>
+          <input class="saved-search" id="savedSearch" type="search" placeholder="제목이나 시인으로 찾기" />
         </div>
         <div class="saved-list" id="savedList"></div>
       </section>
@@ -606,6 +614,7 @@
     const saveBtn = document.querySelector('#saveBtn');
     const savedList = document.querySelector('#savedList');
     const savedCount = document.querySelector('#savedCount');
+    const savedSearch = document.querySelector('#savedSearch');
     const toast = document.querySelector('#toast');
     let current = poems[0];
     let lastIndex = -1;
@@ -629,6 +638,40 @@
       current = picked.poem;
       renderResult(preferences);
       return current;
+    }
+
+    function recentPoemIds() {
+      return JSON.parse(localStorage.getItem('poem-recent') || '[]');
+    }
+
+    function rememberCurrentPoem() {
+      const id = `poem-${String(poems.indexOf(current) + 1).padStart(3, '0')}`;
+      const recent = [id, ...recentPoemIds().filter(item => item !== id)].slice(0, 5);
+      localStorage.setItem('poem-recent', JSON.stringify(recent));
+    }
+
+    async function recommendWithAi(preferences = selections()) {
+      try {
+        const response = await fetch('/api/recommend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...preferences, recentPoemIds: recentPoemIds() })
+        });
+        if (!response.ok) throw new Error('recommendation request failed');
+        const result = await response.json();
+        const matched = poems.find(poem => poem.title === result.title && poem.poet === result.poet);
+        if (!matched) throw new Error('local poem text not found');
+        current = matched;
+        lastIndex = poems.indexOf(matched);
+        if (result.why) current.why = result.why;
+        renderResult(preferences);
+        rememberCurrentPoem();
+        showToast(result.mode === 'ai-search' ? 'AI가 마음에 맞는 시를 찾았어요.' : '추천 시를 골랐어요.');
+      } catch (error) {
+        choosePoem(preferences);
+        rememberCurrentPoem();
+        showToast('AI 검색을 사용할 수 없어 기본 추천을 보여드려요.');
+      }
     }
 
     function renderResult(preferences) {
@@ -656,6 +699,10 @@
       renderSaved();
     }
 
+    function findPoem(item) {
+      return poems.find(poem => poem.title === item.title && poem.poet === item.poet);
+    }
+
     function toggleSave() {
       const index = saved.findIndex(item => item.title === current.title && item.poet === current.poet);
       if (index >= 0) {
@@ -671,21 +718,39 @@
 
     function renderSaved() {
       savedCount.textContent = saved.length;
+      const query = savedSearch.value.trim().toLowerCase();
+      const visible = saved.filter(item => `${item.title} ${item.poet}`.toLowerCase().includes(query));
       if (!saved.length) {
         savedList.innerHTML = '<p class="empty">아직 담은 시가 없어요. 마음에 머문 시를 담아 보세요.</p>';
         return;
       }
-      savedList.innerHTML = saved.map(item => `<article class="saved-card"><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(item.poet)} · ${escapeHtml(item.question)}</span></article>`).join('');
+      if (!visible.length) {
+        savedList.innerHTML = '<p class="empty">검색어와 맞는 담은 시가 없어요.</p>';
+        return;
+      }
+      savedList.innerHTML = visible.map(item => `<button class="saved-card" type="button" data-title="${escapeHtml(item.title)}" data-poet="${escapeHtml(item.poet)}"><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(item.poet)} · ${escapeHtml(item.question)}</span></button>`).join('');
     }
 
     function escapeHtml(value) {
       return String(value).replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
     }
 
-    form.addEventListener('submit', event => { event.preventDefault(); choosePoem(); });
+    form.addEventListener('submit', event => { event.preventDefault(); recommendWithAi(); });
     document.querySelector('#againBtn').addEventListener('click', () => choosePoem());
     saveBtn.addEventListener('click', toggleSave);
     document.querySelector('#savedJump').addEventListener('click', () => document.querySelector('#favorites').scrollIntoView({ behavior:'smooth' }));
+    savedSearch.addEventListener('input', renderSaved);
+    savedList.addEventListener('click', event => {
+      const card = event.target.closest('.saved-card');
+      if (!card) return;
+      const poem = findPoem({ title: card.dataset.title, poet: card.dataset.poet });
+      if (!poem) return;
+      current = poem;
+      lastIndex = poems.indexOf(poem);
+      renderResult(selections());
+      document.querySelector('.result').scrollIntoView({ behavior:'smooth', block:'start' });
+      showToast(`${poem.title}을(를) 다시 열었어요.`);
+    });
     document.querySelector('#clearBtn').addEventListener('click', () => { if (saved.length) { saved = []; persist(); renderResult(selections()); showToast('담은 시를 모두 비웠어요.'); } });
     document.querySelector('#copyBtn').addEventListener('click', async () => {
       const text = `[시를 읽는 너에게]\n${current.title} — ${current.poet}\n\n${current.text}\n\n추천 이유: ${current.why}\n\n감상 질문: ${current.question}\n\n작품 정보: ${current.source}`;
