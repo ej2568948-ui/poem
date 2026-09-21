@@ -189,6 +189,23 @@
     .recommend-btn:hover { background: var(--accent-dark); transform: translateY(-1px); }
     .recommend-btn:focus-visible, .action:focus-visible, .saved-jump:focus-visible { outline: 3px solid rgba(201, 80, 61, .3); outline-offset: 3px; }
 
+    .recommend-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 24px;
+      margin: 12px 0 0;
+      color: var(--accent-dark);
+      font-family: "Malgun Gothic", sans-serif;
+      font-size: .9rem;
+      font-weight: 700;
+    }
+
+    .recommend-status[hidden] { display: none; }
+    .recommend-status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 1s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: .35; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.1); } }
+
     .result {
       position: relative;
       overflow: hidden;
@@ -453,6 +470,7 @@
           </fieldset>
 
           <button class="recommend-btn" type="submit">나에게 맞는 시 추천받기</button>
+          <p class="recommend-status" id="recommendStatus" role="status" aria-live="polite" hidden>시 추천 중 ✨</p>
         </form>
       </section>
 
@@ -709,6 +727,8 @@
     const savedCount = document.querySelector('#savedCount');
     const savedSearch = document.querySelector('#savedSearch');
     const toast = document.querySelector('#toast');
+    const recommendButton = form.querySelector('.recommend-btn');
+    const recommendStatus = document.querySelector('#recommendStatus');
     let current = poems[0];
     let lastIndex = -1;
     let saved = JSON.parse(localStorage.getItem('poem-compass-saved') || '[]');
@@ -763,6 +783,8 @@
     }
 
     async function recommendWithAi(preferences = selections()) {
+      recommendButton.disabled = true;
+      recommendStatus.hidden = false;
       try {
         const response = await fetch('/api/recommend', {
           method: 'POST',
@@ -783,6 +805,9 @@
         choosePoem(preferences);
         rememberCurrentPoem();
         showToast('AI 검색을 사용할 수 없어 기본 추천을 보여드려요.');
+      } finally {
+        recommendButton.disabled = false;
+        recommendStatus.hidden = true;
       }
     }
 
